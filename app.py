@@ -134,10 +134,16 @@ if filtered.empty:
     st.warning("⚠️ No data available for the selected filters.")
 else:
     # --- Line Chart ---
-    fig = px.line(filtered, x="year", y="value", color="sex", markers=True,
+    filtered['color_group'] = filtered['sex']
+    if apply_classification1_filter:
+        filtered['color_group'] += " | " + filtered['classification1']
+    if apply_classification2_filter:
+        filtered['color_group'] += " | " + filtered['classification2']
+
+    fig = px.line(filtered, x="year", y="value", color="color_group", markers=True,
                   title=f"{title} Over Time",
-                  labels={"value": title, "year": "Year", "sex": "Sex"},
-                  color_discrete_sequence=px.colors.qualitative.Set1)
+                  labels={"value": title, "year": "Year", "color_group": "Group"},
+                  color_discrete_sequence=px.colors.qualitative.Set3)
     st.plotly_chart(fig, use_container_width=True)
 
 # --- Summary Cards ---
