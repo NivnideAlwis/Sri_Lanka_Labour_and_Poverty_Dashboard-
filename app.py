@@ -139,50 +139,69 @@ else:
         filtered['color_group'] += " | " + filtered['classification1']
     if apply_classification2_filter:
         filtered['color_group'] += " | " + filtered['classification2']
-
+        
     fig = px.line(filtered, x="year", y="value", color="color_group", markers=True,
                   title=f"{title} Over Time",
                   labels={"value": title, "year": "Year", "color_group": "Group"},
                   color_discrete_sequence=px.colors.qualitative.Set3)
-    st.plotly_chart(fig, use_container_width=True)
+
+# --- Fix legend overlap ---
+    # Determine whether legend should go below based on number of groups
+too_many_groups = filtered['color_group'].nunique() > 6
+fig.update_layout(
+    legend=dict(
+        orientation="h" if too_many_groups else "v",
+        yanchor="bottom" if too_many_groups else "top",
+        y=-0.8 if too_many_groups else 1,
+        xanchor="center" if too_many_groups else "left",
+        x=0.5 if too_many_groups else 1.02,
+        bgcolor="rgba(255,255,255,0.7)",
+        bordercolor="gray",
+        borderwidth=0.5,
+        font=dict(size=10),
+    ),
+    margin=dict(l=60, r=60, t=60, b=120 if too_many_groups else 60),
+    height=650
+)
+st.plotly_chart(fig, use_container_width=True)
 
 # --- Summary Cards ---
-    latest_year = filtered['year'].max()
-    latest = filtered[filtered['year'] == latest_year]
+latest_year = filtered['year'].max()
+latest = filtered[filtered['year'] == latest_year]
 
-    if sex == "All":
+if sex == "All":
         latest_total = latest[latest['sex'] == "Total"]
         mean_val = round(latest_total['value'].mean(), 2)
         min_val = round(latest_total['value'].min(), 2)
         max_val = round(latest_total['value'].max(), 2)
-    else:
+else:
         mean_val = round(latest['value'].mean(), 2)
         min_val = round(latest['value'].min(), 2)
         max_val = round(latest['value'].max(), 2)
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("🔹 Average", f"{mean_val}")
-    col2.metric("📉 Minimum", f"{min_val}")
-    col3.metric("📈 Maximum", f"{max_val}")
-    style_metric_cards()
+col1, col2, col3 = st.columns(3)
+col1.metric("🔹 Average", f"{mean_val}")
+col2.metric("📉 Minimum", f"{min_val}")
+col3.metric("📈 Maximum", f"{max_val}")
+style_metric_cards()
 
     # --- Classification Charts ---
-    grid1, grid2 = st.columns(2)
-    if filtered['classification1'].nunique() > 1:
-        with grid1:
-            fig1 = px.bar(filtered, x='classification1', y='value', color='sex',
-                          title=f"{title} by Classification 1",
-                          labels={"classification1": "Classification 1", "value": title},
-                          color_discrete_sequence=px.colors.qualitative.Pastel)
-            st.plotly_chart(fig1, use_container_width=True)
+grid1, grid2 = st.columns(2)
+if filtered['classification1'].nunique() > 1:
+    with grid1:
+        fig1 = px.bar(filtered, x='classification1', y='value', color='sex',
+                      title=f"{title} by Classification 1",
+                      labels={"classification1": "Classification 1", "value": title},
+                      color_discrete_sequence=px.colors.qualitative.Pastel)
+        st.plotly_chart(fig1, use_container_width=True)
 
-    if filtered['classification2'].nunique() > 1:
-        with grid2:
-            fig2 = px.bar(filtered, x='classification2', y='value', color='sex',
-                          title=f"{title} by Classification 2",
-                          labels={"classification2": "Classification 2", "value": title},
-                          color_discrete_sequence=px.colors.qualitative.Prism)
-            st.plotly_chart(fig2, use_container_width=True)
+if filtered['classification2'].nunique() > 1:
+    with grid2:
+        fig2 = px.bar(filtered, x='classification2', y='value', color='sex',
+                      title=f"{title} by Classification 2",
+                      labels={"classification2": "Classification 2", "value": title},
+                      color_discrete_sequence=px.colors.qualitative.Prism)
+        st.plotly_chart(fig2, use_container_width=True)
 
 # --- Footer ---
 st.markdown("---")
