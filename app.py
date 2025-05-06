@@ -136,9 +136,9 @@ latest = filtered[filtered['year'] == latest_year]
 
 if sex == "All":
     latest_total = latest[latest['sex'] == "Total"]
-    mean_val = round(latest_total['value'].mean(), 2)
-    min_val = round(latest_total['value'].min(), 2)
-    max_val = round(latest_total['value'].max(), 2)
+    mean_val = round(latest_total['value'].mean("Total"), 2)
+    min_val = round(latest_total['value'].min("Total"), 2)
+    max_val = round(latest_total['value'].max("Total"), 2)
 else:
     mean_val = round(latest['value'].mean(), 2)
     min_val = round(latest['value'].min(), 2)
